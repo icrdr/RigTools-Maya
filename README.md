@@ -62,4 +62,5 @@ from rigTools import install
 cmds.evalDeferred("install.start()")
 ```
 Add it at last line.
+
 **Or simply put the offered 'userSetup.py' into 'Script Path'**:
