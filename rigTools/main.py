@@ -18,17 +18,17 @@ def _mergeCurves(curves):
     for curve in curves: 
         #make sure curveShapes don't move
         cmds.makeIdentity(curve, a=1)  
-        
+    
         #merge to groupTransform
-        curveShapes = cmds.listRelatives(curve, s=1)
+        curveShapes = cmds.listRelatives(curve, s=1, f=1)
         for curveShape in curveShapes:           
             cmds.parent(curveShape, groupTransform, r=1, s=1)
-            
+        
         #delect rest
         cmds.delete(curve)
     
     #connect Drawing Overrides
-    curveShapes = cmds.listRelatives(groupTransform, s=1)
+    curveShapes = cmds.listRelatives(groupTransform, s=1, f=1)
     for curveShape in curveShapes:
         if curveShape != curveShapes[0]:
             cmds.connectAttr("%s.drawOverride"%curveShapes[0], "%s.drawOverride"%curveShape, f=1)
@@ -37,6 +37,7 @@ def _mergeCurves(curves):
     cmds.xform(groupTransform, cp=1)
     cmds.bakePartialHistory(groupTransform, pc=1)
     cmds.select(groupTransform)
+    
 
 def _unparentAndStore(obj,saveList):
     attrs = ["tx", "ty", "tz", "rx", "ry", "rz", "sx", "sy", "sz", "t", "r", "s"]
@@ -269,13 +270,15 @@ def _groupIt(ctls):
 def mergeCurves():
     try:
         sl = _checkIfselected()
-        for curveShape in cmds.listRelatives(sl, s=1):
+        
+        for curveShape in cmds.listRelatives(sl, s=1, f=1):
             if not cmds.objectType(curveShape, i='nurbsCurve'):
                 raise Exception,"Bad selection! They need to be unparented!" 
+        
         for curve in sl:
             if cmds.listRelatives(curve, p=1, f=1):
                raise Exception,"Bad selection! They need to be unparented!" 
-            elif cmds.listRelatives(curve, c=1, typ='transform'):
+            elif cmds.listRelatives(curve, c=1, typ='transform', f=1):
                raise Exception,"They must not having children!" 
 
         _mergeCurves(sl)    
@@ -309,34 +312,40 @@ def spaceSwitchSetup():
     else:
         om.MGlobal.displayInfo("It works!")
 
+def _getPosition(obj):
+    grp = cmds.group(em=1,name="xLEAVEMEALONE")
+    cmds.matchTransform(grp, obj)
+    cmds.setAttr("xLEAVEMEALONE.tx", l=1, cb=0, k=0)
+    cmds.setAttr("xLEAVEMEALONE.ty", l=1, cb=0, k=0)
+    cmds.setAttr("xLEAVEMEALONE.tz", l=1, cb=0, k=0)
+    cmds.setAttr("xLEAVEMEALONE.rx", l=1, cb=0, k=0)
+    cmds.setAttr("xLEAVEMEALONE.ry", l=1, cb=0, k=0)
+    cmds.setAttr("xLEAVEMEALONE.rz", l=1, cb=0, k=0)
+    cmds.setAttr("xLEAVEMEALONE.sx", l=1, cb=0, k=0)
+    cmds.setAttr("xLEAVEMEALONE.sy", l=1, cb=0, k=0)
+    cmds.setAttr("xLEAVEMEALONE.sz", l=1, cb=0, k=0)
+    cmds.setAttr("xLEAVEMEALONE.v", 0 , l=1, cb=0, k=0)
+
+def _setPosition(obj):
+    grp = cmds.ls("xLEAVEMEALONE")
+    cmds.matchTransform(obj, grp)
+    cmds.delete(grp)
+
 def matchTransform(): 
     try:  
         sl = _checkIfselected()
         if len(sl) == 1:
-            grp = cmds.ls("LEAVEMEALONE")
+            grp = cmds.ls("xLEAVEMEALONE")
             if grp:
-                cmds.matchTransform(sl[0], grp)
-                cmds.delete(grp)
+                _setPosition(sl[0])
                 cmds.select(sl[0])
             else:
-                grp = cmds.group(em=1,name="LEAVEMEALONE")
-                cmds.matchTransform(grp, sl[0])
-                cmds.setAttr("LEAVEMEALONE.tx", l=1, cb=0, k=0)
-                cmds.setAttr("LEAVEMEALONE.ty", l=1, cb=0, k=0)
-                cmds.setAttr("LEAVEMEALONE.tz", l=1, cb=0, k=0)
-                cmds.setAttr("LEAVEMEALONE.rx", l=1, cb=0, k=0)
-                cmds.setAttr("LEAVEMEALONE.ry", l=1, cb=0, k=0)
-                cmds.setAttr("LEAVEMEALONE.rz", l=1, cb=0, k=0)
-                cmds.setAttr("LEAVEMEALONE.sx", l=1, cb=0, k=0)
-                cmds.setAttr("LEAVEMEALONE.sy", l=1, cb=0, k=0)
-                cmds.setAttr("LEAVEMEALONE.sz", l=1, cb=0, k=0)
-                cmds.setAttr("LEAVEMEALONE.v", 0 , l=1, cb=0, k=0)
+                _getPosition(sl[0])
                 cmds.select(sl[0])
         elif len(sl) == 2:
-            WP = [cmds.xform(sl[1],ws=1,q=1,t=1),cmds.xform(sl[1],ws=1,q=1,ro=1)]
-            print(WP)
-            cmds.xform(sl[0],ws=1,t=(WP[0][0],WP[0][1],WP[0][2]))
-            cmds.xform(sl[0],ws=1,ro=(WP[1][0],WP[1][1],WP[1][2]))
+            _getPosition(sl[1])
+            _setPosition(sl[0])
+            cmds.select(sl[0])
         else:
             raise Exception,"1 or 2 items are needed!"
     except Exception, err:
