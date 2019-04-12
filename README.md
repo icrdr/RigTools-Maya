@@ -8,6 +8,8 @@ a simple rigging tools in maya.
 a simple tool-kit for rigging in maya. Those tools merged commonly used sequential-operation into one click button. 
 It makes rigging much more convenit.
 </br>
+**For maya 2018, maya 2019**
+</br>
 
 ![](https://github.com/icrdr/Maya-RigTools/raw/master/img/1.png)
 #### Edge 2 Curves
