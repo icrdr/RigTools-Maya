@@ -168,8 +168,9 @@ def _spaceSwitchSetup(targets, contained):
 
     condition_nodes = cmds.listConnections("%s.follow"%contained, d=1, s=0)
     #print(condition_nodes)
-    for nodes in condition_nodes:
-        cmds.delete(nodes)
+    if condition_nodes:
+        for nodes in condition_nodes:
+            cmds.delete(nodes)
     #connect node
     for inx, target in enumerate(target_list):
         condition_node = cmds.shadingNode("condition", au=1);
