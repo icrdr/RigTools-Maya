@@ -118,61 +118,65 @@ def _reparentFormStore(saveList):
         for attr in attrs:
             cmds.setAttr("%s.%s"%(obj, attr), l=1)    
 
-def _spaceSwitchSetup(objs):
-    target = objs[(len(objs)-1)]
-    print("target is: '%s'"%target)
-     
-    target_grp = cmds.listRelatives(target, p=1, f=1)
-        
-    target_grp = target_grp[0]
-    constraint_list=[]
+def _spaceSwitchSetup(targets, contained):  
+    contained_grp = cmds.listRelatives(contained, p=1, f=1)
+    
+    select_list=[]
         
     #check if it has parent: add it first
-    target_grp_prt = cmds.listRelatives(target_grp, p=1, f=1)
-    if target_grp_prt:
-        constraint_list.append(target_grp_prt[0])
+    contained_grp_prt = cmds.listRelatives(contained_grp, p=1, f=1)
+    if contained_grp_prt:
+        select_list.append(contained_grp_prt[0])
     
-    for obj in objs:
-        if obj == target: 
-            continue 
-        constraint_list.append(obj)
+    for target in targets:
+        select_list.append(target)
         
-    constraint_list.append(target_grp)
-    print(constraint_list)
+    select_list.append(contained_grp)
     
     cmds.select(cl=1)
-    for obj in constraint_list:
+    for obj in select_list:
         cmds.select(obj, add=1)
      
     constraint = cmds.parentConstraint(mo=1)[0]
+
+    target_list = cmds.listAttr(constraint, st="*W*",ud=1)
+    #print(target_list)
     
-    #create the enum attr
+    #edit enum
     enumName = ""
+    prtName = ""
+    if contained_grp_prt:
+        prtName = contained_grp_prt[0].split(":")[-1].split("|")[-1]
     
-    if target_grp_prt:
-        enumName = ":Parent"
+    for target in target_list:
+        name = target[0:-2]
         
-    for obj in objs:
-        if obj == target: 
-            continue 
-        enumName = enumName + ":" + obj.split(":")[-1].split("|")[-1]
+        if prtName == name:
+            enumName = enumName + ":Parent"
+        else:
+            enumName = enumName + ":" + target[0:-2]
+
     enumName = enumName[1:]
-    
-    print("enumName is: '%s'"%enumName)    
-    if cmds.attributeQuery('follow', node=target, ex=1):
-        cmds.addAttr("%s.follow"%target, k=1, e=1, ln="follow", at="enum", en=enumName )
+
+    if cmds.attributeQuery('follow', node=contained, ex=1):
+        cmds.addAttr("%s.follow"%contained, k=1, e=1, ln="follow", at="enum", en=enumName )
     else:
-        cmds.addAttr(target, k=1, ln="follow", at="enum", en=enumName )
-    
+        cmds.addAttr(contained, k=1, ln="follow", at="enum", en=enumName ) 
+
+    #set to 0
+    cmds.setAttr("%s.follow"%contained, 0)
+
+    condition_nodes = cmds.listConnections("%s.follow"%contained, d=1, s=0)
+    #print(condition_nodes)
+    for nodes in condition_nodes:
+        cmds.delete(nodes)
     #connect node
-    constraint_list = constraint_list[:-1]
-    for inx, obj in enumerate(constraint_list):
+    for inx, target in enumerate(target_list):
         condition_node = cmds.shadingNode("condition", au=1);
-        print(condition_node)
-        cmds.connectAttr("%s.follow"%target, "%s.firstTerm"%condition_node, f=1)
+
+        cmds.connectAttr("%s.follow"%contained, "%s.firstTerm"%condition_node, f=1)
         
-        weight_name = "%s.%sW%d"%(constraint,obj.split(":")[-1].split("|")[-1],inx)
-        print("weight name is: '%s'"%weight_name)
+        weight_name = constraint+"."+target
         
         cmds.connectAttr("%s.outColorR"%condition_node, weight_name, f=1)
         cmds.setAttr("%s.secondTerm"%condition_node, inx)
@@ -303,14 +307,22 @@ def groupIt(*args):
 def spaceSwitchSetup(*args):
     try:
         sl = cmds.ls(sl=1)
+        
 
         if len(sl) < 2:
             raise Exception,"USAGE: Select all spaces, than select the target at last."
         
-        elif not cmds.listRelatives(cmds.ls(sl=1, tl=1)[0], p=1, f=1):
-            raise Exception,"Target needs a group, Please group it first."
+        targets = sl[0:-1]
+        contained = sl[len(sl)-1]
 
-        _spaceSwitchSetup(sl)
+        contained_prt = cmds.listRelatives(contained, p=1, f=1)
+
+        #if it don't have group
+        if not contained_prt or cmds.listRelatives(contained_prt, s=1):
+            _groupIt(contained)
+
+        _spaceSwitchSetup(targets, contained)
+        cmds.select(contained)
     except Exception, err:
         om.MGlobal.displayError(err)
     else:
