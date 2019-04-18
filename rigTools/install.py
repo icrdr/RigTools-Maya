@@ -18,7 +18,7 @@ class customShelf(shelf._shelf):
         self.addButon("Save or load Transform", icon="locator.png", command=main.saveTransform)
         self.addButon("Rename It", icon="quickRename.png", command=main.renameIt)
         self.addSeparator()
-        p = self.addMenu("Display Toggle", icon="hsClearView.png")
+        p = self.addMenu("Toggle Display", icon="hsClearView.png")
         self.addMenuItem(p, "Display All", command=main.displayAll)
         self.addMenuItem(p, "Mesh and Curve Only ", command=main.displayMeshCurve)
         self.addMenuItem(p, "Mesh Only ", command=main.displayMesh)

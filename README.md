@@ -2,52 +2,77 @@
 a simple rigging tools in maya.
 
 ![](img/0.png)
-</br>
 
 ## Instructions
 a simple tool-kit for rigging in maya. Those tools merged commonly used sequential-operation into one click button. 
 It makes rigging much more convenit.
-</br>
 **For maya 2018, maya 2019**
-</br>
 
-![](https://github.com/icrdr/Maya-RigTools/raw/master/img/1.png)
+![](img/1.png)
 #### Edge 2 Curves
-Single click: create curves from polygon's edge with 1 degree.
-Double click: create curves from polygon's edge with 3 degree.
-</br>
-</br>
+Create curves from polygon's edges
 
-![](https://github.com/icrdr/Maya-RigTools/raw/master/img/2.png)
+**USAGE:**
+Select polygon's edges, execute.
+`Single click: curves with 1 degree.`
+`Double click: curves with 3 degree.`
+
+![](img/2.png)
 #### Merge Curves
 Merge selected curves' shape into one object.
-</br>
-</br>
+**USAGE:**
+Select at least one curve, execute.
 
-![](https://github.com/icrdr/Maya-RigTools/raw/master/img/3.png)
+![](img/5.png)
+#### Match Transform
+Match Transform two objects' transform.
+**USAGE:**
+Select the object, than the target, execute.
+`Double click: only effect pivot.`
+
+![](img/3.png)
 #### Group It
-Group the every selected items at same position, than transfer items' transformation to it's group. 
-</br>
-</br>
+Group the every selected object at same position, than transfer items' transformation to it's group. 
+**USAGE:**
+Select at least one object, execute.
 
-![](https://github.com/icrdr/Maya-RigTools/raw/master/img/4.png)
+![](img/4.png)
 #### Space Switch Setup
 Create a space switching system form selection.
-Select order: Target1, Target2, ..., Controller.
-</br>
-</br>
+**USAGE:**
+Select Target1, Target2, ..., Controller, execute.
 
-![](https://github.com/icrdr/Maya-RigTools/raw/master/img/5.png)
-#### Match Transform
-Select 1 item: Save or load transformation.
-Select 2 items: Transfer the first selected item's transformation to the second.
-</br>
-</br>
+![](img/7.png)
+#### Orient Joint
+Orient Joint to custom world up.
+**USAGE:**
+Select at least one joint, execute.
+![](img/10.png)
+Set parameters, press button.
 
-![](https://github.com/icrdr/Maya-RigTools/raw/master/img/6.png)
+![](img/11.png)
+#### Save or Load Transform
+Save or load selected object's transform
+**USAGE:**
+Select only one object, execute.
+
+![](img/6.png)
 #### Rename It
 rename both item's group and itself.
-</br>
+**USAGE:**
+Select only one object, execute.
+
+![](img/8.png)
+#### Toggle Display
+Display only meshes and curves or not
+**USAGE:**
+Choose display mode
+
+![](img/9.png)
+#### Toggle LocalAxis
+Toggle display of LocalAxis
+**USAGE:**
+Select at least one object, execute.
 
 ## How to install
 1. Simply put folder **'rigTools'** under **'Script Path'**
