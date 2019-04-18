@@ -1,7 +1,7 @@
 # Maya-RigTools
 a simple rigging tools in maya.
 
-![](https://github.com/icrdr/Maya-RigTools/raw/master/img/0.png)
+![](img/0.png)
 </br>
 
 ## Instructions
