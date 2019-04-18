@@ -119,7 +119,7 @@ def _reparentFormStore(saveList):
             cmds.setAttr("%s.%s"%(obj, attr), l=1)    
 
 def _spaceSwitchSetup(objs):
-    target = cmds.ls(sl=1, tl=1)[0]  
+    target = objs[(len(objs)-1)]
     print("target is: '%s'"%target)
      
     target_grp = cmds.listRelatives(target, p=1, f=1)
@@ -200,14 +200,12 @@ def _renameIt(obj,win,*args):
         cmds.rename(obj, name_str)
         cmds.rename(prt, name_str+"_grp")
         cmds.deleteUI(win)  
-        om.MGlobal.displayInfo("It works!") 
+        om.MGlobal.displayInfo("SUCCEED!") 
     else:
         om.MGlobal.displayError("Input anything, allright?")
     
 def _groupIt(ctls):
-    PARENT_LIST = {}
-    LOOK_LIST = {}
-    SAVE_LIST = [PARENT_LIST,LOOK_LIST]
+    SAVE_LIST = [{},{}]
     
     #get the UID of controllers
     uCtls = cmds.ls(ctls,uid=1)
@@ -265,56 +263,62 @@ def _groupIt(ctls):
         
         cmds.rename(grp, ctl_name+"_grp")
 
-    print("it works")
+    print("SUCCEED")
 
-def mergeCurves():
+def mergeCurves(*args):
     try:
-        sl = _checkIfselected()
+        sl = cmds.ls(sl=1)
+
+        if len(sl) < 1:
+            raise Exception,"USAGE: Select at least one curve."
         
         for curveShape in cmds.listRelatives(sl, s=1, f=1):
             if not cmds.objectType(curveShape, i='nurbsCurve'):
-                raise Exception,"Bad selection! They need to be unparented!" 
+                raise Exception,"They are not curves." 
         
         for curve in sl:
             if cmds.listRelatives(curve, p=1, f=1):
-               raise Exception,"Bad selection! They need to be unparented!" 
+               raise Exception,"They need to be unparented." 
             elif cmds.listRelatives(curve, c=1, typ='transform', f=1):
-               raise Exception,"They must not having children!" 
+               raise Exception,"They must not having children." 
 
         _mergeCurves(sl)    
     except Exception, err:
         om.MGlobal.displayError(err)
     else:
-        om.MGlobal.displayInfo("It works!")
+        om.MGlobal.displayInfo("SUCCEED!")
 
-def groupIt():
+def groupIt(*args):
     try:
-        sl = _checkIfselected()
+        sl = cmds.ls(sl=1)
+
+        if len(sl) < 1:
+            raise Exception,"USAGE: Select one object."
         _groupIt(sl)    
     except Exception, err:
         om.MGlobal.displayError(err)
     else:
-        om.MGlobal.displayInfo("It works!")
+        om.MGlobal.displayInfo("SUCCEED!")
 
-def spaceSwitchSetup():
+def spaceSwitchSetup(*args):
     try:
-        sl = _checkIfselected()
+        sl = cmds.ls(sl=1)
 
         if len(sl) < 2:
-            raise Exception,"At least 2 items are selected!"
+            raise Exception,"USAGE: Select all spaces, than select the target at last."
         
         elif not cmds.listRelatives(cmds.ls(sl=1, tl=1)[0], p=1, f=1):
-            raise Exception,"Target needs a group! Please group it first."
+            raise Exception,"Target needs a group, Please group it first."
 
         _spaceSwitchSetup(sl)
     except Exception, err:
         om.MGlobal.displayError(err)
     else:
-        om.MGlobal.displayInfo("It works!")
+        om.MGlobal.displayInfo("SUCCEED!")
 
 def _getPosition(obj):
-    grp = cmds.group(em=1,name="xLEAVEMEALONE")
-    cmds.matchTransform(grp, obj)
+    loc = cmds.spaceLocator(name="xLEAVEMEALONE")
+    cmds.matchTransform(loc, obj)
     cmds.setAttr("xLEAVEMEALONE.tx", l=1, cb=0, k=0)
     cmds.setAttr("xLEAVEMEALONE.ty", l=1, cb=0, k=0)
     cmds.setAttr("xLEAVEMEALONE.tz", l=1, cb=0, k=0)
@@ -327,60 +331,155 @@ def _getPosition(obj):
     cmds.setAttr("xLEAVEMEALONE.v", 0 , l=1, cb=0, k=0)
 
 def _setPosition(obj):
-    grp = cmds.ls("xLEAVEMEALONE")
-    cmds.matchTransform(obj, grp)
-    cmds.delete(grp)
+    loc = cmds.ls("xLEAVEMEALONE")
+    cmds.matchTransform(obj, loc)
+    cmds.delete(loc)
 
-def matchTransform(): 
+def saveTransform(*args):
     try:  
-        sl = _checkIfselected()
-        if len(sl) == 1:
-            grp = cmds.ls("xLEAVEMEALONE")
-            if grp:
-                _setPosition(sl[0])
-                cmds.select(sl[0])
-            else:
-                _getPosition(sl[0])
-                cmds.select(sl[0])
-        elif len(sl) == 2:
-            _getPosition(sl[1])
+        sl = cmds.ls(sl=1)
+        
+        if len(sl) != 1:
+            raise Exception,"USAGE: Select one object."
+            
+        loc = cmds.ls("xLEAVEMEALONE")
+        if loc:
             _setPosition(sl[0])
             cmds.select(sl[0])
         else:
-            raise Exception,"1 or 2 items are needed!"
+            _getPosition(sl[0])
+            cmds.select(sl[0])
+            
+
     except Exception, err:
         om.MGlobal.displayError(err)
     else:
-        om.MGlobal.displayInfo("It works!")
+        om.MGlobal.displayInfo("SUCCEED!")
 
-def renameIt():
+def matchTransform(*args): 
+    try:  
+        sl = cmds.ls(sl=1)
+
+        if len(sl) != 2:
+            raise Exception,"USAGE: Select one object, than shift select the target."
+            
+        cmds.matchTransform(sl[0], sl[1])   
+
+    except Exception, err:
+        om.MGlobal.displayError(err)
+    else:
+        om.MGlobal.displayInfo("SUCCEED!")
+
+def _matchPivot(objs):
+    SAVE_LIST = [{},{}]
+    obj = objs[0]
+    target = objs[1]
+
+    #get the UID of obj
+    uObj = cmds.ls(obj, uid=1)
+
+    #clear attrs'connection of all children before the operation.
+    SAVE_LIST = _unparentAndStore(obj, SAVE_LIST) 
+    obj = cmds.ls(uObj, l=1)[0]
+
+    pivotTranslate = cmds.xform (target, q=1, ws=1, rp=1)
+
+    cmds.parent(obj, target)
+    obj = cmds.ls(uObj, l=1)[0]
+
+    cmds.makeIdentity(obj, a=1, t=1, r=1, s=1)
+    cmds.xform (obj, ws=1, piv=pivotTranslate)
+    cmds.parent(obj, w=1)
+
+    #reparent
+    #print(SAVE_LIST)
+    _reparentFormStore(SAVE_LIST)
+    
+    
+
+def matchPivot(*args):
     try:
-        sl = _checkIfselected()
-        if len(sl) >1:
-            raise Exception,"Only 1 item is need!"
+        sl = cmds.ls(sl=1)
+
+        if len(sl) != 2:
+            raise Exception,"USAGE: Select one object, than shift select the target."
+
+        _matchPivot(sl)
+    except Exception, err:
+        om.MGlobal.displayError(err)
+    else:
+        om.MGlobal.displayInfo("SUCCEED!")
+
+def renameIt(*args):
+    try:
+        sl = cmds.ls(sl=1)
+
+        if len(sl) != 1:
+            raise Exception,"USAGE: Select one object."
 
         prt = cmds.listRelatives(sl, p=1, f=1)
         if not prt: 
-            raise Exception,"It don't have group"
+            raise Exception,"It don't have group."
         elif cmds.listRelatives(prt[0], c=1, s=1, f=1):
-            raise Exception,"It's parent is not a group"
+            raise Exception,"It's parent is not a group."
 
         _renameWindow(sl)
     except Exception, err:
         om.MGlobal.displayError(err)
     else:
-        om.MGlobal.displayInfo("Input name now")
+        om.MGlobal.displayInfo("Input name now.")
 
-def polyToCurve():
+def polyToCurve(*args):
     cmds.polyToCurve(form=2, degree=1, conformToSmoothMeshPreview=1) 
     cmds.bakePartialHistory(pc=1)
 
-def polyToCurveS():
+def polyToCurveS(*args):
     cmds.polyToCurve(form=2, degree=3, conformToSmoothMeshPreview=1)  
     cmds.bakePartialHistory(pc=1)
 
-def _checkIfselected():
-    sl = cmds.ls(sl=1)
-    if not sl:
-        raise Exception,"nothing is selected!"
-    return sl
+def displayAll(*args):
+    panel = cmds.getPanel(wf=1)
+    print(panel)
+    cmds.modelEditor(panel, e=1, alo=1)
+
+def displayMeshCurve(*args):
+    panel = cmds.getPanel(wf=1)
+    print(panel)
+    cmds.modelEditor(panel, e=1, alo=0)
+    cmds.modelEditor(panel, e=1, pm=1, nc=1)
+
+def displayMesh(*args):
+    panel = cmds.getPanel(wf=1)
+    print(panel)
+    cmds.modelEditor(panel, e=1, alo=0)
+    cmds.modelEditor(panel, e=1, pm=1)
+
+def showSelectedLocalAxis(*args):
+    try:
+        sl = cmds.ls(sl=1)
+
+        if len(sl) < 1:
+            raise Exception,"USAGE: Select at least one object."
+
+        _doToggleLocalAxis(sl, 1)
+    except Exception, err:
+        om.MGlobal.displayError(err)
+    else:
+        om.MGlobal.displayInfo("SUCCEED!")
+
+def hideSelectedLocalAxis(*args):
+    try:
+        sl = cmds.ls(sl=1)
+
+        if len(sl) < 1:
+            raise Exception,"USAGE: Select at least one object."
+
+        _doToggleLocalAxis(sl, 0)
+    except Exception, err:
+        om.MGlobal.displayError(err)
+    else:
+        om.MGlobal.displayInfo("SUCCEED!")
+
+def _doToggleLocalAxis(objs, showOrHide):
+	for obj in objs:
+		cmds.toggle(obj, localAxis=True, state=showOrHide)

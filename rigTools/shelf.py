@@ -31,7 +31,15 @@ class _shelf():
         if icon:
             icon = self.iconPath + icon
         cmds.shelfButton(width=37, height=37, iol=name, image=icon, l=label, command=command, dcc=doubleCommand, olb=self.labelBackground, olc=self.labelColour)
-
+    
+    def addMenu(self, label, name="", icon="commandButton.png", command=_null, doubleCommand=_null):
+        '''Adds a shelf button with the specified label, command, double click command and image.'''
+        cmds.setParent(self.name)
+        if icon:
+            icon = self.iconPath + icon
+        cmds.shelfButton(width=37, height=37, iol=name, image=icon, l=label, olb=self.labelBackground, olc=self.labelColour)
+        return cmds.popupMenu(b=1)
+    
     def addMenuItem(self, parent, label, command=_null, icon=""):
         '''Adds a shelf button with the specified label, command, double click command and image.'''
         if icon:
