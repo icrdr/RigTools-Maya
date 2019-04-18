@@ -41,7 +41,7 @@ Select at least one object, execute.
 **Space Switch Setup**  
 Create a space switching system form selection.  
 **USAGE:**  
-Select Target1, Target2, ..., Controller, execute.  
+Select target1, target2, ..., contained, execute.  
 
 ![](img/7.png)  
 **Orient Joint**  

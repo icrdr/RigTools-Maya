@@ -310,7 +310,7 @@ def spaceSwitchSetup(*args):
         
 
         if len(sl) < 2:
-            raise Exception,"USAGE: Select all spaces, than select the target at last."
+            raise Exception,"USAGE: Select target1, target2, ..., contained."
         
         targets = sl[0:-1]
         contained = sl[len(sl)-1]
