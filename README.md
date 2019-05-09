@@ -10,7 +10,7 @@ It makes rigging much more convenit.
 
 ![](img/1.png)  
 **Edge 2 Curves**  
-Create curves from polygon's edges  
+Create curves from polygon's edges.  
 **USAGE:**  
 Select polygon's edges, execute.  
 `
@@ -53,7 +53,7 @@ Set parameters, press button.
 
 ![](img/11.png)  
 **Save or Load Transform**  
-Save or load selected object's transform  
+Save or load selected object's transform.  
 **USAGE:**  
 Select only one object, execute.  
 
